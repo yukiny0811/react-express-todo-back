@@ -9,32 +9,28 @@ const allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*')
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
     res.header(
-      'Access-Control-Allow-Headers',
-      'Content-Type, Authorization, access_token'
+        'Access-Control-Allow-Headers',
+        'Content-Type, Authorization, access_token'
     )
-  
-    // intercept OPTIONS method
     if ('OPTIONS' === req.method) {
-      res.send(200)
+        res.send(200)
     } else {
-      next()
+        next()
     }
-  }
-  app.use(allowCrossDomain)
+}
+app.use(allowCrossDomain)
 
 let db = new sqlite3.Database("todo")
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }))
 
-app.get("/hello", (req, res) => {
-    res.send("hello server")
-})
+db.run("create table if not exists todo(id, title)")
 
 app.post("/post", (req, res) => {
     console.log(req.body)
     db.run("insert into todo(id, title) values(?,?)", uuid(), req.body["title"])
-    res.json(req.body)
+    res.json({})
 })
 
 app.post("/delete/:id", (req, res) => {
@@ -47,21 +43,6 @@ app.get("/getall", (req, res) => {
     db.all("select * from todo", (err, rows) => {
         return res.json(rows)
     })
-})
-
-app.get("/test/post", (req, res) => {
-    db.run("insert into todo(id, title) values(?,?)", uuid(), uuid())
-    res.json({})
-})
-
-app.get("/create_db", (req, res) => {
-    db.run("create table if not exists todo(id, title)")
-    res.json({})
-})
-
-app.get("/deleteall", (req, res) => {
-    db.run("delete from todo")
-    res.json({})
 })
 
 const webServer = http.createServer(app)
